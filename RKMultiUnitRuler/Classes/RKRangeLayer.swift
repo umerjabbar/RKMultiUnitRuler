@@ -49,7 +49,7 @@ public class RKRangeMarkerType: NSObject, NSCopying {
     }
 
     public override var description: String {
-        return String("scale : \(self.scale) name: \(self.name) " +
+        return String("scale : \(self.scale) name: \(self.name ?? "") " +
                 "color: \(self.color) font: \(self.font.description) size: \(self.size.debugDescription)")
     }
 
@@ -211,7 +211,7 @@ class RKRangeLayer: CALayer {
             }
             if let imageToDraw = UIGraphicsGetImageFromCurrentImageContext() {
                 UIGraphicsEndImageContext();
-                imageToDraw.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
+                imageToDraw.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
                 contents = imageToDraw.cgImage
             }
         }
@@ -227,11 +227,11 @@ class RKRangeLayer: CALayer {
         let rangeEnd = fmax(self.range.location, self.range.location + self.range.length)
         let colorOverride = self.colorOverride(for: marker.value)
         let color = colorOverride ?? marker.type.color
-        let textAttributes = [
-                NSFontAttributeName: marker.type.font,
-                NSForegroundColorAttributeName: marker.type.color
-        ] as [String: Any]
-        let textSize = NSString(string: marker.text).size(attributes: textAttributes)
+        let textAttributes: [NSAttributedString.Key : Any] = [
+                NSAttributedString.Key.font: marker.type.font,
+                NSAttributedString.Key.foregroundColor: marker.type.color
+        ]
+        let textSize = NSString(string: marker.text).size(withAttributes: textAttributes)
         let xPos = pos - marker.type.size.width / 2
         var yPos: CGFloat = 0.0
 
@@ -268,11 +268,11 @@ class RKRangeLayer: CALayer {
         let rangeEnd = fmax(self.range.location, self.range.location + self.range.length)
         let colorOverride = self.colorOverride(for: marker.value)
         let color = colorOverride ?? marker.type.color
-        let textAttributes = [
-                NSFontAttributeName: marker.type.font,
-                NSForegroundColorAttributeName: marker.type.color
-        ] as [String: Any]
-        let textSize = NSString(string: marker.text).size(attributes: textAttributes)
+        let textAttributes: [NSAttributedString.Key : Any] = [
+                NSAttributedString.Key.font: marker.type.font,
+                NSAttributedString.Key.foregroundColor: marker.type.color
+        ]
+        let textSize = NSString(string: marker.text).size(withAttributes: textAttributes)
 
         let yPos = self.frame.height - pos - marker.type.size.width / 2
         var xPos: CGFloat = 0.0
