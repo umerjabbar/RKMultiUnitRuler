@@ -17,7 +17,7 @@ public class RKRangePointerView: UIView {
 
     var shape: RKRangePointerShape = .triangle
     var sideOffset = kDefaultPointerLayerSideOffset
-    var fillColor: UIColor = UIColor.white
+    public var fillColor: UIColor = UIColor.green
     var lineColor: UIColor = UIColor.white
     var direction: RKLayerDirection = .horizontal
     var radius: CGFloat = 6.0
@@ -68,6 +68,7 @@ public class RKRangePointerView: UIView {
             ctx.setStrokeColor(self.lineColor.cgColor)
             ctx.setLineWidth(0.5)
             ctx.drawPath(using: .fillStroke)
+            
         }
     }
 }

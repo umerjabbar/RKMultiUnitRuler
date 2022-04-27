@@ -10,9 +10,11 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
     open var sideOffset: CGFloat = kDefaultScrollViewSideOffset
     open var direction: RKLayerDirection = .horizontal
     open var colorOverrides: Dictionary<RKRange<Float>, UIColor>?
+    open var flag = false
     open var range: RKRange<Float> = RKRange<Float>(location: 0, length: 0) {
         didSet {
             setupScrollView()
+            
             currentValue = ceilf((range.location + range.length) / 2.0)
         }
     }
@@ -79,6 +81,7 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             if (oldValue != currentValue) {
                 self.sendActions(for: UIControl.Event.valueChanged)
             }
+            
         }
     }
 
@@ -116,6 +119,7 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             let minScale = RKRangeMarkerType.minScale(types: self.markerTypes)
             self.currentValue = Float(lroundf(oldValue / minScale)) * minScale
             self.sendActions(for: UIControl.Event.valueChanged)
+            
         }
     }
 
@@ -157,6 +161,7 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
                 animations: {
                     self.automaticallyUpdatingScroll = true
                     self.scrollView.setContentOffset(self.contentOffsetForValue(value: self.currentValue), animated: false)
+                    
                 },
                 completion: { completed in
                     self.automaticallyUpdatingScroll = false
@@ -223,8 +228,17 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
         switch (self.direction) {
         case .horizontal:
             let widthPerScale = Float(self.bounds.size.width) / scaleFitsInScreen
-            let width = min(widthPerScale * self.range.length, kRangeLayerMaximumWidth)
-            return CGRect(x: 0.0, y: 0.0, width: Double(width), height: Double(self.frame.height))
+           let width = min(widthPerScale * self.range.length, kRangeLayerMaximumWidth)
+
+            if !flag
+            {
+                return CGRect(x: 0.0, y: 0.0, width: Double(width), height: Double(self.frame.height))
+
+            }
+            else{
+                return CGRect(x: 0.0, y: 0.0, width: Double(width * 4), height: Double(self.frame.height))
+            }
+            
         case .vertical:
             let heightPerScale = Float(self.bounds.size.height) / scaleFitsInScreen
             let height = min(heightPerScale * self.range.length, kRangeLayerMaximumHeight)
