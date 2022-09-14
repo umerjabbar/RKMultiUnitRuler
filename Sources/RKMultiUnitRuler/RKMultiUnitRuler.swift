@@ -187,30 +187,32 @@ public class RKMultiUnitRuler: UIView {
     }
     
     private func setupSegmentControl() -> UISegmentedControl {
-        if let dataSource = self.dataSource {
-            self.segmentControl = UISegmentedControl()
-            self.segmentControl.translatesAutoresizingMaskIntoConstraints = false
+        if let dataSource = dataSource {
+            segmentControl = UISegmentedControl()
+            segmentControl.translatesAutoresizingMaskIntoConstraints = false
             for index in 0 ... dataSource.numberOfSegments - 1 {
-                self.segmentControl.insertSegment(withTitle: dataSource.unitForSegmentAtIndex(
-                    index: index).name,
-                                                  at: index, animated: true)
+                segmentControl.insertSegment(
+                    withTitle: dataSource.unitForSegmentAtIndex(
+                        index: index).name,
+                    at: index, animated: true
+                )
             }
             
             if (dataSource.numberOfSegments > 0) {
                 self.segmentControl.selectedSegmentIndex = 0
                 if let unit = dataSource.unitForSegmentAtIndex(index: 0).unit {
                     let style = dataSource.styleForUnit(unit)
-                    self.segmentControl.tintColor = UIColor.yellow
-                    self.segmentControl.setTitleTextAttributes(
+                    segmentControl.tintColor = UIColor.yellow
+                    segmentControl.setTitleTextAttributes(
                         [NSAttributedString.Key.foregroundColor: style.textFieldTextColor,
                          NSAttributedString.Key.font: kDefaultSegmentControlTitleFont], for: .normal)
                     
                 }
             }
             segmentControl.isHidden = true
-            self.addSubview(self.segmentControl)
-            if let tintColor = self.tintColor {
-                self.segmentControl.tintColor = UIColor.clear
+            addSubview(segmentControl)
+            if tintColor != nil {
+                segmentControl.tintColor = UIColor.clear
             }
         }
         return self.segmentControl
@@ -231,9 +233,7 @@ public class RKMultiUnitRuler: UIView {
         if let dataSource = self.dataSource, let scrollViews = self.scrollViews {
             let segmentUnit = dataSource.unitForSegmentAtIndex(index: segmentControl.selectedSegmentIndex)
             if let measurement = self.measurement, let unit = segmentUnit.unit {
-                var value = Float(measurement.converting(to: unit).value)
-                let minScale = RKRangeMarkerType.minScale(types: segmentUnit.markerTypes)
-                //value = Float(lroundf(value / minScale)) * minScale
+                let value = Float(measurement.converting(to: unit).value)
                 self.textViews?[segmentControl.selectedSegmentIndex].currentValue = value
                 scrollViews[segmentControl.selectedSegmentIndex].currentValue = value
                 scrollViews[segmentControl.selectedSegmentIndex].scrollToCurrentValueOffset()
@@ -295,14 +295,12 @@ public class RKMultiUnitRuler: UIView {
                 for index in 0 ... scrollViews.count - 1 {
                     let segmentUnit = dataSource.unitForSegmentAtIndex(index: index)
                     if let measurement = self.measurement, let unit = segmentUnit.unit {
-                        var value = Float(measurement.converting(to: unit).value)
-                        let minScale = RKRangeMarkerType.minScale(types: segmentUnit.markerTypes)
+                        let value = Float(measurement.converting(to: unit).value)
                         //value = Float(lroundf(value / minScale)) * minScale
                         if index != segmentControl.selectedSegmentIndex {
                             self.textViews?[index].currentValue = value
                         } else {
                             DispatchQueue.main.async {
-                                
                                 let _ = self.textViews?[index].resignFirstResponder()
                                 self.textViews?[index].currentValue = value
                                 self.textViews?[index].updateTextValue(value: "\(value)")
