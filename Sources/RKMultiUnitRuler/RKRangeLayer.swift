@@ -15,17 +15,17 @@ public enum RKMarkerVerticalAlignment: Int {
 public class RKRange<T>: NSObject {
     open var location: T
     open var length: T
-
+    
     public init(location: T, length: T) {
         self.location = location
         self.length = length
         super.init()
     }
-
+    
     public override var description: String {
         return String("location : \(self.location) length: \(self.length)")
     }
-
+    
     public override var debugDescription: String {
         return String("location : \(self.location) length: \(self.length)")
     }
@@ -40,19 +40,19 @@ public class RKRangeMarkerType: NSObject, NSCopying {
     open var size: CGSize = CGSize(width: 2.0, height: 10.0)
     open var color: UIColor = UIColor.white
     open var font: UIFont = kDefaultMarkerTypeFont
-
+    
     public convenience init(color: UIColor, size: CGSize, scale: Float) {
         self.init()
         self.color = color
         self.size = size
         self.scale = scale
     }
-
+    
     public override var description: String {
         return String("scale : \(self.scale) name: \(self.name) " +
-                "color: \(self.color) font: \(self.font.description) size: \(self.size.debugDescription)")
+                      "color: \(self.color) font: \(self.font.description) size: \(self.size.debugDescription)")
     }
-
+    
     class func minScale(types: Array<RKRangeMarkerType>?) -> Float {
         var minScale = Float.greatestFiniteMagnitude
         if let types = types {
@@ -62,9 +62,9 @@ public class RKRangeMarkerType: NSObject, NSCopying {
         }
         return minScale
     }
-
+    
     class func largestScale(types: Array<RKRangeMarkerType>?) -> Float {
-
+        
         var largestScale = Float.leastNormalMagnitude
         if let types = types {
             for markerType in types {
@@ -73,7 +73,7 @@ public class RKRangeMarkerType: NSObject, NSCopying {
         }
         return largestScale
     }
-
+    
     public func copy(with zone: NSZone? = nil) -> Any {
         let copy = RKRangeMarkerType()
         copy.scale = self.scale
@@ -99,15 +99,15 @@ class RKRangeMarker: NSObject {
         formatter.maximumFractionDigits = 2
         return formatter
     }
-
+    
     public override var description: String {
         return String("value: \(self.value)  text: \(self.text)")
     }
-
+    
     public override var debugDescription: String {
         return String("type : \(self.type) value: \(self.value) " +
-                "textAlignment \(self.textAlignment)" +
-                "alignment: \(self.alignment) text: \(self.text) textAlignment: \(self.textAlignment)")
+                      "textAlignment \(self.textAlignment)" +
+                      "alignment: \(self.alignment) text: \(self.text) textAlignment: \(self.textAlignment)")
     }
 }
 
@@ -115,7 +115,7 @@ class RKRangeLayer: CALayer {
     var direction: RKLayerDirection = .horizontal
     var markerTypes: Array<RKRangeMarkerType> = Array()
     var colorOverrides: Dictionary<RKRange<Float>, UIColor>?
-
+    
     var range: RKRange<Float> = RKRange<Float>(location: 0, length: 0) {
         didSet {
             if range.length != 0 {
@@ -123,9 +123,9 @@ class RKRangeLayer: CALayer {
             }
         }
     }
-
+    
     lazy var markers: Array<RKRangeMarker> = self.initializeMarkers()
-
+    
     override var frame: CGRect {
         didSet {
             if (oldValue != self.frame) {
@@ -134,16 +134,16 @@ class RKRangeLayer: CALayer {
             }
         }
     }
-
+    
     override func display() {
         super.display()
-
+        
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         self.drawLayer()
         CATransaction.commit()
     }
-
+    
     func initializeMarkers() -> Array<RKRangeMarker> {
         var valueToMarkerMap: [Float: RKRangeMarker] = [:]
         if (self.frame.size.width > 0 && self.markerTypes.count > 0) {
@@ -168,7 +168,7 @@ class RKRangeLayer: CALayer {
             $0.value < $1.value
         }
     }
-
+    
     private func colorOverride(for location: Float) -> UIColor? {
         if let overrides = self.colorOverrides {
             for (range, color) in overrides {
@@ -181,10 +181,10 @@ class RKRangeLayer: CALayer {
         }
         return nil
     }
-
+    
     /*
-        Draw the markers
-    */
+     Draw the markers
+     */
     func drawLayer() {
         UIGraphicsBeginImageContextWithOptions(self.frame.size, false, UIScreen.main.scale);
         var position: Float = Float(kDefaultScrollViewSideOffset)
@@ -216,13 +216,13 @@ class RKRangeLayer: CALayer {
             }
         }
     }
-
+    
     /*
-        Draw one marker. If marker.labelVisible is true then draw its numerical
-        representation.
-        marker.type.size is used for drawing the "thin" line that represents each
-        marker
-    */
+     Draw one marker. If marker.labelVisible is true then draw its numerical
+     representation.
+     marker.type.size is used for drawing the "thin" line that represents each
+     marker
+     */
     func drawMarkerInHorizontalDirection(_ marker: RKRangeMarker, at pos: CGFloat, in context: CGContext) {
         let rangeEnd = fmax(self.range.location, self.range.location + self.range.length)
         let colorOverride = self.colorOverride(for: marker.value)
@@ -234,7 +234,7 @@ class RKRangeLayer: CALayer {
         let textSize = NSString(string: marker.text).size(withAttributes: textAttributes)
         let xPos = pos - marker.type.size.width / 2
         var yPos: CGFloat = 0.0
-
+        
         switch (marker.alignment) {
         case .bottom:
             yPos = (self.frame.size.height - marker.type.size.height) / 2.0
@@ -243,10 +243,10 @@ class RKRangeLayer: CALayer {
         case .top:
             yPos = 0
         }
-
+        
         let textXPos = pos - textSize.width / 2
         var textYPos: CGFloat = 0.0
-
+        
         switch (marker.textAlignment) {
         case .bottom:
             textYPos = textSize.height + marker.type.size.height
@@ -263,21 +263,21 @@ class RKRangeLayer: CALayer {
             NSString(string: marker.text).draw(in: markerTextRect, withAttributes: textAttributes)
         }
     }
-
+    
     func drawMarkerInVerticalDirection(_ marker: RKRangeMarker, at pos: CGFloat, in context: CGContext) {
         let rangeEnd = fmax(self.range.location, self.range.location + self.range.length)
         let colorOverride = self.colorOverride(for: marker.value)
         let color = colorOverride ?? marker.type.color
         let textAttributes = [
-                  NSAttributedString.Key.font: marker.type.font,
-                  NSAttributedString.Key.foregroundColor: marker.type.color
-              ] as [NSAttributedString.Key: Any]
+            NSAttributedString.Key.font: marker.type.font,
+            NSAttributedString.Key.foregroundColor: marker.type.color
+        ] as [NSAttributedString.Key: Any]
         let textSize = NSString(string: marker.text).size(withAttributes: textAttributes)
-
+        
         let yPos = self.frame.height - pos - marker.type.size.width / 2
         var xPos: CGFloat = 0.0
-
-
+        
+        
         switch (marker.alignment) {
         case .bottom:
             xPos = (self.frame.size.width - marker.type.size.height - textSize.width) / 2.0
@@ -286,10 +286,10 @@ class RKRangeLayer: CALayer {
         case .top:
             xPos = 0
         }
-
+        
         let textYPos = self.frame.height - pos - textSize.width / 2
         var textXPos: CGFloat = 0.0
-
+        
         switch (marker.textAlignment) {
         case .bottom:
             textXPos = textSize.width + marker.type.size.height
@@ -299,9 +299,9 @@ class RKRangeLayer: CALayer {
             textXPos = 0
         }
         let markerRect = CGRect(x: xPos,
-                y: yPos,
-                width: marker.type.size.height,
-                height: marker.type.size.width)
+                                y: yPos,
+                                width: marker.type.size.height,
+                                height: marker.type.size.width)
         let markerTextRect = CGRect(x: textXPos, y: textYPos, width: textSize.width, height: textSize.height)
         context.setFillColor(color.cgColor)
         context.fill(markerRect)

@@ -6,7 +6,7 @@ import UIKit
 import QuartzCore
 
 class RKRangeScrollView: UIControl, UIScrollViewDelegate {
-
+    
     open var sideOffset: CGFloat = kDefaultScrollViewSideOffset
     open var direction: RKLayerDirection = .horizontal
     open var colorOverrides: Dictionary<RKRange<Float>, UIColor>?
@@ -23,24 +23,24 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             setupScrollView()
         }
     }
-
+    
     var automaticallyUpdatingScroll: Bool = false
     public var currentValue: Float = 0
     var scrollView: UIScrollView = UIScrollView()
     var rangeLayer: RKRangeLayer = RKRangeLayer()
-
-
+    
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupScrollView()
-
+        
     }
-
+    
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         setupScrollView()
     }
-
+    
     func setupScrollView() {
         if let _ = self.markerTypes {
             self.subviews.forEach({ $0.removeFromSuperview() })
@@ -55,8 +55,8 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             self.addSubview(scrollView)
         }
     }
-
-
+    
+    
     func setupRangeLayer() {
         if let markerTypes = self.markerTypes {
             self.rangeLayer = RKRangeLayer()
@@ -65,13 +65,13 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             self.scrollView.layer.addSublayer(rangeLayer)
         }
     }
-
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         setupScrollView()
     }
-
-
+    
+    
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if (!automaticallyUpdatingScroll) {
             let oldValue = currentValue
@@ -84,14 +84,14 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             
         }
     }
-
+    
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
-
+        
     }
-
+    
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
     }
-
+    
     func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         var value = self.valueForContentOffset(contentOffset: targetContentOffset.pointee)
         let minScale = RKRangeMarkerType.minScale(types: self.markerTypes)
@@ -103,16 +103,16 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             targetContentOffset.pointee.y = self.contentOffsetForValue(value: value).y
         }
     }
-
+    
     func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
     }
-
+    
     func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
     }
-
+    
     /*
-        trigger "valueChanged" once deceleration is completed.
-    */
+     trigger "valueChanged" once deceleration is completed.
+     */
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         if (!automaticallyUpdatingScroll) {
             let oldValue = self.valueForContentOffset(contentOffset: self.scrollView.contentOffset)
@@ -122,27 +122,27 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             
         }
     }
-
+    
     func scrollViewDidEndScrollingAnimation(_ scrollView: UIScrollView) {
     }
-
+    
     func viewForZooming(`in` scrollView: UIScrollView) -> UIView? {
         return nil
     }
-
+    
     func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
     }
-
+    
     func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
     }
-
+    
     func scrollViewShouldScrollToTop(_ scrollView: UIScrollView) -> Bool {
         return false
     }
-
+    
     func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
     }
-
+    
     func contentOffsetForValue(value: Float) -> CGPoint {
         let rangeStart = fmin(self.range.location, self.range.location + self.range.length)
         switch self.direction {
@@ -151,23 +151,23 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             return CGPoint(x: contentOffset, y: scrollView.contentOffset.y)
         case .vertical:
             let contentOffset: CGFloat = self.rangeLayer.frame.height - CGFloat(value - rangeStart) * self.offsetCoefficient() -
-                    scrollView.contentInset.top - 2*self.sideOffset
+            scrollView.contentInset.top - 2*self.sideOffset
             return CGPoint(x: scrollView.contentOffset.x, y: contentOffset)
         }
     }
-
+    
     func scrollToCurrentValueOffset() {
         UIView.animate(withDuration: 0.2,
-                animations: {
-                    self.automaticallyUpdatingScroll = true
-                    self.scrollView.setContentOffset(self.contentOffsetForValue(value: self.currentValue), animated: false)
-                    
-                },
-                completion: { completed in
-                    self.automaticallyUpdatingScroll = false
-                })
+                       animations: {
+            self.automaticallyUpdatingScroll = true
+            self.scrollView.setContentOffset(self.contentOffsetForValue(value: self.currentValue), animated: false)
+            
+        },
+                       completion: { completed in
+            self.automaticallyUpdatingScroll = false
+        })
     }
-
+    
     func valueForContentOffset(contentOffset: CGPoint) -> Float {
         let rangeStart = fmin(self.range.location, self.range.location + self.range.length)
         switch self.direction {
@@ -176,11 +176,11 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             return value
         case .vertical:
             let value = Float(rangeStart) + Float(self.rangeLayer.frame.height -
-                    (contentOffset.y + 2*self.sideOffset + self.scrollView.contentInset.top)) / Float(self.offsetCoefficient())
+                                                  (contentOffset.y + 2*self.sideOffset + self.scrollView.contentInset.top)) / Float(self.offsetCoefficient())
             return value
         }
     }
-
+    
     func offsetCoefficient() -> CGFloat {
         switch self.direction {
         case .horizontal:
@@ -189,12 +189,12 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
             return self.self.rangeLayer.frame.height / CGFloat(abs(range.length))
         }
     }
-
+    
     /*
-        Use self.sideOffset as the margin for the left and right.
-        Use the RangeLayer width as the content width and retain scrollView height
-
-    */
+     Use self.sideOffset as the margin for the left and right.
+     Use the RangeLayer width as the content width and retain scrollView height
+     
+     */
     override func layoutSubviews() {
         super.layoutSubviews()
         self.rangeLayer.direction = self.direction
@@ -221,19 +221,19 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
         }
         self.scrollView.contentOffset = self.contentOffsetForValue(value: self.currentValue)
     }
-
+    
     func frameForRangeLayer() -> CGRect {
         let maxScale = RKRangeMarkerType.largestScale(types: self.markerTypes)
         let scaleFitsInScreen = range.length < 5 * maxScale ? 1 : 5 * maxScale
         switch (self.direction) {
         case .horizontal:
             let widthPerScale = Float(self.bounds.size.width) / scaleFitsInScreen
-           let width = min(widthPerScale * self.range.length, kRangeLayerMaximumWidth)
-
+            let width = min(widthPerScale * self.range.length, kRangeLayerMaximumWidth)
+            
             if !flag
             {
                 return CGRect(x: 0.0, y: 0.0, width: Double(width), height: Double(self.frame.height))
-
+                
             }
             else{
                 return CGRect(x: 0.0, y: 0.0, width: Double(width * 4), height: Double(self.frame.height))

@@ -14,27 +14,27 @@ public enum RKRangePointerShape: Int {
 
 
 public class RKRangePointerView: UIView {
-
+    
     var shape: RKRangePointerShape = .triangle
     var sideOffset = kDefaultPointerLayerSideOffset
     public var fillColor: UIColor = UIColor.green
     var lineColor: UIColor = UIColor.white
     var direction: RKLayerDirection = .horizontal
     var radius: CGFloat = 6.0
-
-
+    
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.contentMode = .redraw
     }
-
-
+    
+    
     required public init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         self.contentMode = .redraw
     }
-
-
+    
+    
     override public func draw(_ rect: CGRect) {
         let center = CGPoint(x: self.bounds.size.width / 2.0, y: self.bounds.size.height / 2.0)
         //

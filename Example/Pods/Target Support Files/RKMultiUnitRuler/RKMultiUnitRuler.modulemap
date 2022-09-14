@@ -1,6 +1,0 @@
-framework module RKMultiUnitRuler {
-  umbrella header "RKMultiUnitRuler-umbrella.h"
-
-  export *
-  module * { export * }
-}

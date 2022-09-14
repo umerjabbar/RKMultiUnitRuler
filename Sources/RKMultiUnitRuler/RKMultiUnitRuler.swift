@@ -64,7 +64,7 @@ public class RKSegmentUnitControlStyle: NSObject {
     public var textFieldFont: UIFont = kDefaultTextFieldFont
     public var textFieldTextColor: UIColor = UIColor.white
     public var flagOfView: Bool = false
-
+    
     public var pointerColor: UIColor = UIColor.white
     public var textOfUnit : String = ""
     public var scrollViewBackgroundColor: UIColor = UIColor.clear
@@ -102,7 +102,7 @@ public class RKMultiUnitRuler: UIView {
     private var segmentedViews: Array<UIView>?
     public var pointerViews: Array<RKRangePointerView>?
     public var pointerView: RKRangePointerView?
-
+    
     private var scrollViews: Array<RKRangeScrollView>?
     private var textViews: Array<RKRangeTextView>?
     public var direction: RKLayerDirection = .horizontal
@@ -250,7 +250,7 @@ public class RKMultiUnitRuler: UIView {
             let activeSegmentUnit = dataSource.unitForSegmentAtIndex(
                 index: segmentControl.selectedSegmentIndex)
             if let unit = activeSegmentUnit.unit,
-                let scrollViewOfSelectedSegment = self.scrollViews?[segmentControl.selectedSegmentIndex] {
+               let scrollViewOfSelectedSegment = self.scrollViews?[segmentControl.selectedSegmentIndex] {
                 self.measurement = NSMeasurement(doubleValue: Double(scrollViewOfSelectedSegment.currentValue),
                                                  unit: unit)
                 self.delegate?.valueChanged(measurement: self.measurement!)
@@ -307,7 +307,7 @@ public class RKMultiUnitRuler: UIView {
                                 self.textViews?[index].currentValue = value
                                 self.textViews?[index].updateTextValue(value: "\(value)")
                                 
-
+                                
                             }
                         }
                     }
@@ -343,7 +343,7 @@ public class RKMultiUnitRuler: UIView {
                     let underlineView = self.setupSegmentLineUnderBottomView(inSegmentView: segmentView)
                     let lbl = self.setupLabelBottomView(inSegmentView: segmentView, style: style)
                     
-//                    lbl.frame = CGRect(x: -30, y:0, width:self.bounds.width, height:self.bounds.height)
+                    //                    lbl.frame = CGRect(x: -30, y:0, width:self.bounds.width, height:self.bounds.height)
                     
                     let segmentSubViews = ["scrollView": scrollView,
                                            "textView": textView,
@@ -382,8 +382,8 @@ public class RKMultiUnitRuler: UIView {
                                                                       views: segmentSubViews)
                         constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|[lbl]-20-|",
                                                                       options: NSLayoutConstraint.FormatOptions.alignAllCenterX,
-                        metrics: nil,
-                        views: segmentSubViews)
+                                                                      metrics: nil,
+                                                                      views: segmentSubViews)
                         constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|-5-[scrollView]-5-|",
                                                                       options: NSLayoutConstraint.FormatOptions.directionLeadingToTrailing,
                                                                       metrics: nil,
@@ -413,8 +413,8 @@ public class RKMultiUnitRuler: UIView {
                     textViews.append(textView)
                     pointerViews.append(pointerView)
                     self.addSubview(segmentView)
-//                    lbl.frame = CGRect(x: -60, y:0, width:self.bounds.width, height:self.bounds.height)
-
+                    //                    lbl.frame = CGRect(x: -60, y:0, width:self.bounds.width, height:self.bounds.height)
+                    
                 }
             }
         }
@@ -458,19 +458,19 @@ public class RKMultiUnitRuler: UIView {
                                         unit segmentUnit: RKSegmentUnit,
                                         style: RKSegmentUnitControlStyle) -> RKRangeTextView {
         let textView = RKRangeTextView(frame: self.bounds)
-//        textView.frame = CGRect(x: -30, y:0, width:self.bounds.width, height:self.bounds.height)
-
+        //        textView.frame = CGRect(x: -30, y:0, width:self.bounds.width, height:self.bounds.height)
+        
         textView.backgroundColor = style.textFieldBackgroundColor
         textView.textField.backgroundColor = style.textFieldBackgroundColor
         textView.textField.textColor = style.textFieldTextColor
         textView.textField.textAlignment = .center
         textView.flagOfView = style.flagOfView
-//        textView.unit = segmentUnit.unit
+        //        textView.unit = segmentUnit.unit
         textView.formatter = segmentUnit.formatter
         textView.textField.font = UIFont.boldSystemFont(ofSize: 45)
         textView.textField.text = ""
-//        textView.layer.borderColor = UIColor.black.cgColor
-//        textView.layer.borderWidth = 2
+        //        textView.layer.borderColor = UIColor.black.cgColor
+        //        textView.layer.borderWidth = 2
         
         
         
@@ -487,15 +487,15 @@ public class RKMultiUnitRuler: UIView {
         let label = UILabel(frame: self.bounds)
         print("lbl  \(self.bounds)")
         label.backgroundColor = UIColor.white
-//        if NSLocale.preferredLanguages[0].contains("ar")
+        //        if NSLocale.preferredLanguages[0].contains("ar")
         if UserDefaults.standard.object(forKey: "Lang") as! String == "AR"
         {
             print("Ruller ---- ar   \(NSLocale.preferredLanguages[0])")
-
+            
             label.font = UIFont(name: "Tajawal-Regular", size: 14.0)
-
+            
         }else{
-        label.font = UIFont(name: "AvertaPE-Regular", size: 14.0)
+            label.font = UIFont(name: "AvertaPE-Regular", size: 14.0)
         }
         label.text = style.textOfUnit
         label.textColor = UIColor.gray
@@ -526,7 +526,7 @@ public class RKMultiUnitRuler: UIView {
     }
 }
 extension UITextField {
-
+    
     func setUnderLine() {
         let border = CALayer()
         let width = CGFloat(0.5)
@@ -536,5 +536,5 @@ extension UITextField {
         self.layer.addSublayer(border)
         self.layer.masksToBounds = true
     }
-
+    
 }
