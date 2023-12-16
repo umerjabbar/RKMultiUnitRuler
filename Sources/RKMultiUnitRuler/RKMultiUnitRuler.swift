@@ -481,18 +481,22 @@ public class RKMultiUnitRuler: UIView {
         return textView
     }
     
+    public var isArabic: Bool {
+        if #available(iOS 16, *) {
+            return Locale.current.language.languageCode?.identifier ?? "en" == "ar"
+        } else {
+            return Locale.current.languageCode ?? "en" == "ar"
+        }
+    }
+    
     private func setupLabelBottomView(inSegmentView parent: UIView,style: RKSegmentUnitControlStyle) -> UIView {
         let label = UILabel(frame: self.bounds)
         print("lbl  \(self.bounds)")
         label.backgroundColor = UIColor.white
-        //        if NSLocale.preferredLanguages[0].contains("ar")
-        if UserDefaults.standard.object(forKey: "Lang") as! String == "AR"
-        {
-            print("Ruller ---- ar   \(NSLocale.preferredLanguages[0])")
-            
+        
+        if isArabic {
             label.font = UIFont(name: "Tajawal-Regular", size: 14.0)
-            
-        }else{
+        } else {
             label.font = UIFont(name: "AvertaPE-Regular", size: 14.0)
         }
         label.text = style.textOfUnit
