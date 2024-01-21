@@ -186,17 +186,18 @@ class RKRangeLayer: CALayer {
      Draw the markers
      */
     func drawLayer() {
-        UIGraphicsBeginImageContextWithOptions(self.frame.size, false, UIScreen.main.scale);
-        var position: Float = Float(kDefaultScrollViewSideOffset)
-        var distanceBetweenLeastScaleMarkers: Float = 0.0
-        switch self.direction {
-        case .horizontal:
-            distanceBetweenLeastScaleMarkers = Float(self.frame.width) / range.length
-        case .vertical:
-            distanceBetweenLeastScaleMarkers = Float(self.frame.height) / range.length
-        }
-        var previousMarker: RKRangeMarker?
-        if let context = UIGraphicsGetCurrentContext() {
+        let renderer = UIGraphicsImageRenderer(size: self.frame.size, format: UIGraphicsImageRendererFormat.default())
+        renderer.image { imageContext in
+            var position: Float = Float(kDefaultScrollViewSideOffset)
+            var distanceBetweenLeastScaleMarkers: Float = 0.0
+            switch self.direction {
+            case .horizontal:
+                distanceBetweenLeastScaleMarkers = Float(self.frame.width) / range.length
+            case .vertical:
+                distanceBetweenLeastScaleMarkers = Float(self.frame.height) / range.length
+            }
+            var previousMarker: RKRangeMarker?
+            let context = imageContext.cgContext
             for marker in self.markers {
                 if let previousMarker = previousMarker {
                     position = position + (marker.value - previousMarker.value) * distanceBetweenLeastScaleMarkers
@@ -209,12 +210,12 @@ class RKRangeLayer: CALayer {
                 }
                 previousMarker = marker
             }
-            if let imageToDraw = UIGraphicsGetImageFromCurrentImageContext() {
-                UIGraphicsEndImageContext();
-                imageToDraw.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
-                contents = imageToDraw.cgImage
-            }
+            let imageToDraw = imageContext.currentImage
+            imageToDraw.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+            contents = imageToDraw.cgImage
+            
         }
+        //        UIGraphicsBeginImageContextWithOptions(self.frame.size, false, UIScreen.main.scale);
     }
     
     /*
