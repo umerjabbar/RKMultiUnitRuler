@@ -7,7 +7,7 @@ import QuartzCore
 
 class RKRangeScrollView: UIControl, UIScrollViewDelegate {
     
-    open var sideOffset: CGFloat = kDefaultScrollViewSideOffset
+    open var sideOffset: CGFloat = Constants.defaultScrollViewSideOffset
     open var direction: RKLayerDirection = .horizontal
     open var colorOverrides: Dictionary<RKRange<Float>, UIColor>?
     open var flag = false
@@ -228,20 +228,18 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
         switch (self.direction) {
         case .horizontal:
             let widthPerScale = Float(self.bounds.size.width) / scaleFitsInScreen
-            let width = min(widthPerScale * self.range.length, kRangeLayerMaximumWidth)
+            let width = min(widthPerScale * self.range.length, Constants.rangeLayerMaximumWidth)
             
-            if !flag
-            {
-                return CGRect(x: 0.0, y: 0.0, width: Double(width), height: Double(self.frame.height))
-                
-            }
-            else{
-                return CGRect(x: 0.0, y: 0.0, width: Double(width * 4), height: Double(self.frame.height))
-            }
+//            if !flag {
+//                return CGRect(x: 0.0, y: 0.0, width: Double(width), height: Double(self.frame.height))
+//                
+//            } else {
+                return CGRect(x: 0.0, y: 0.0, width: Double(width * 2), height: Double(self.frame.height))
+//            }
             
         case .vertical:
             let heightPerScale = Float(self.bounds.size.height) / scaleFitsInScreen
-            let height = min(heightPerScale * self.range.length, kRangeLayerMaximumHeight)
+            let height = min(heightPerScale * self.range.length, Constants.rangeLayerMaximumHeight)
             return CGRect(x: 0.0, y: 0.0, width: Double(self.frame.width), height: Double(height))
         }
     }

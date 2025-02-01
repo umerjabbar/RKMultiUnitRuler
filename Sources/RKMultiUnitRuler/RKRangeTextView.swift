@@ -24,6 +24,7 @@ class RKRangeTextView: UIControl, UITextFieldDelegate {
     var unit: Dimension?
     var flagOfView = false
     var parentView: RKMultiUnitRuler?
+    var colorOverrides: Dictionary<RKRange<Float>, UIColor>?
     
     func addDoneButtonOnKeyboard() {
         let doneToolbar: UIToolbar = UIToolbar(frame:  CGRect(x: 0, y: 0, width: 320, height: 50))
@@ -78,13 +79,12 @@ class RKRangeTextView: UIControl, UITextFieldDelegate {
                 originalCursorPosition = textField.position(from: selectedRange.start, offset: 1)
             }
         }
-        if let formatter = self.formatter, let unit = self.unit {
-            let measurement = Measurement(value: Double(value), unit: unit)
-            self.textField.text = formatter.string(from: measurement)
-        } else {
-            self.textField.text = String(format: "%.1f", value)
-            
-        }
+//        if let formatter = self.formatter, let unit = self.unit {
+//            let measurement = Measurement(value: Double(value), unit: unit)
+        self.textField.text = value.formatted(.number)
+//        } else {
+//            self.textField.text = String(format: "%.1f", value)
+//        }
         if let position = originalCursorPosition {
             self.textField.selectedTextRange = textField.textRange(
                 from: position, to: position)
@@ -137,26 +137,42 @@ class RKRangeTextView: UIControl, UITextFieldDelegate {
     internal func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
     }
     
-    func updateTextValue(value:String){
+    func updateTextValue(value: String){
         textField.text = value
-        updateTextColor()
+        updateTextColor(text: value)
     }
     
-    func updateTextColor(){
-        if flagOfView {
-            if currentValue > 250 || currentValue < 54 {
-                textField.textColor = #colorLiteral(red: 0.8117647059, green: 0, blue: 0.2470588235, alpha: 1)
-            }
-            else if currentValue > 180 && currentValue <= 250 {
-                textField.textColor = #colorLiteral(red: 1, green: 0.5490196078, blue: 0.2039215686, alpha: 1)
-            }
-            else if currentValue >= 70 && currentValue <= 180 {
-                textField.textColor = #colorLiteral(red: 0.1490196078, green: 0.8470588235, blue: 0.4980392157, alpha: 1)
-            }
-            else if currentValue >= 54 && currentValue < 70 {
-                textField.textColor = #colorLiteral(red: 0.8117647059, green: 0, blue: 0.2470588235, alpha: 1)
+    private func colorOverride(for location: Float) -> UIColor? {
+        if let overrides = self.colorOverrides {
+            for (range, color) in overrides {
+                let rangeStart = fmin(range.location, range.location + range.length)
+                let rangeEnd = fmax(range.location, range.location + range.length)
+                if rangeStart <= location && location <= rangeEnd {
+                    return color
+                }
             }
         }
+        return nil
+    }
+    
+    func updateTextColor(text: String) {
+        if let floatValue = Float(text), let color = colorOverride(for: floatValue) {
+            textField.textColor = color
+        }
+//        if flagOfView {
+//            if currentValue > 250 || currentValue < 54 {
+//                textField.textColor = #colorLiteral(red: 0.8117647059, green: 0, blue: 0.2470588235, alpha: 1)
+//            }
+//            else if currentValue > 180 && currentValue <= 250 {
+//                textField.textColor = #colorLiteral(red: 1, green: 0.5490196078, blue: 0.2039215686, alpha: 1)
+//            }
+//            else if currentValue >= 70 && currentValue <= 180 {
+//                textField.textColor = #colorLiteral(red: 0.1490196078, green: 0.8470588235, blue: 0.4980392157, alpha: 1)
+//            }
+//            else if currentValue >= 54 && currentValue < 70 {
+//                textField.textColor = #colorLiteral(red: 0.8117647059, green: 0, blue: 0.2470588235, alpha: 1)
+//            }
+//        }
     }
     func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         if let char = string.cString(using: String.Encoding.utf8) {
@@ -181,22 +197,9 @@ class RKRangeTextView: UIControl, UITextFieldDelegate {
         } else {
             if let updatedStringAsFloat = updatedString?.floatValue {
                 currentValue = updatedStringAsFloat
-                if flagOfView {
-                    if currentValue > 250 || currentValue < 54 {
-                        textField.textColor = #colorLiteral(red: 0.8117647059, green: 0, blue: 0.2470588235, alpha: 1)
-                    }
-                    else if currentValue > 180 && currentValue <= 250 {
-                        textField.textColor = #colorLiteral(red: 1, green: 0.5490196078, blue: 0.2039215686, alpha: 1)
-                    }
-                    else if currentValue >= 70 && currentValue <= 180 {
-                        textField.textColor = #colorLiteral(red: 0.1490196078, green: 0.8470588235, blue: 0.4980392157, alpha: 1)
-                    }
-                    else if currentValue >= 54 && currentValue < 70 {
-                        textField.textColor = #colorLiteral(red: 0.8117647059, green: 0, blue: 0.2470588235, alpha: 1)
-                    }
-                }
+                updateTextColor(text: updatedString ?? "")
                 self.sendActions(for: UIControl.Event.valueChanged)
-            }else{
+            } else {
                 currentValue = 0
                 self.sendActions(for: UIControl.Event.valueChanged)
             }

@@ -38,8 +38,8 @@ public class RKRangeMarkerType: NSObject, NSCopying {
     open var image: UIImage?
     open var labelVisible: Bool = false
     open var size: CGSize = CGSize(width: 2.0, height: 10.0)
-    open var color: UIColor = UIColor.white
-    open var font: UIFont = kDefaultMarkerTypeFont
+    open var color: UIColor = .label
+    open var font: UIFont = Constants.defaultMarkerTypeFont
     
     public convenience init(color: UIColor, size: CGSize, scale: Float) {
         self.init()
@@ -188,7 +188,7 @@ class RKRangeLayer: CALayer {
     func drawLayer() {
         let renderer = UIGraphicsImageRenderer(size: self.frame.size, format: UIGraphicsImageRendererFormat.default())
         renderer.image { imageContext in
-            var position: Float = Float(kDefaultScrollViewSideOffset)
+            var position: Float = Float(Constants.defaultScrollViewSideOffset)
             var distanceBetweenLeastScaleMarkers: Float = 0.0
             switch self.direction {
             case .horizontal:

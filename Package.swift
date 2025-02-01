@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
     name: "RKMultiUnitRuler",
     platforms: [
-        .iOS(.v13)
+        .iOS(.v16)
     ],
     products: [
         .library(

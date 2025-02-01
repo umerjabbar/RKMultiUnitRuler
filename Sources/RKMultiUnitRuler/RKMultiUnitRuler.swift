@@ -4,42 +4,28 @@
 
 import UIKit
 
-
-/*
- 
- public class RKSegmentUnitFormatter {
- open var unit : Dimension?
- open var markerTypes: Array<RKRangeMarkerType> = Array()
- open func string(from measurement: Measurement<Unit>) -> String {
- }
- }
- */
-
-
 public enum RKLayerDirection: Int {
-    case vertical = 0, horizontal
+    case vertical = 0
+    case horizontal
 }
-
 
 public class RKSegmentUnit: NSObject, NSCopying {
     public var unit: Dimension?
-    public var name: String = String()
+    public var name: String = ""
     public var image: UIImage?
-    public var markerTypes: Array<RKRangeMarkerType> = Array()
+    public var markerTypes: [RKRangeMarkerType] = []
     
-    
-    public var formatter: MeasurementFormatter? {
-        didSet {
-            if let formatter = self.formatter {
-                if formatter.numberFormatter.numberStyle == .decimal {
-                    let numberFormatter: NumberFormatter = NumberFormatter()
-                    numberFormatter.paddingPosition = .afterSuffix
-                    numberFormatter.maximumFractionDigits = 2
-                    formatter.numberFormatter = numberFormatter
-                }
-            }
-        }
-    }
+    public var formatter: MeasurementFormatter?
+    //    {
+    //        didSet {
+    //            if let formatter = formatter, formatter.numberFormatter.numberStyle == .decimal, formatter.numberFormatter.maximumFractionDigits != 0 {
+    //                let numberFormatter = NumberFormatter()
+    //                numberFormatter.paddingPosition = .afterSuffix
+    //                numberFormatter.maximumFractionDigits = 2
+    //                formatter.numberFormatter = numberFormatter
+    //            }
+    //        }
+    //    }
     
     public convenience init(name: String, unit: Dimension, formatter: MeasurementFormatter) {
         self.init()
@@ -48,45 +34,39 @@ public class RKSegmentUnit: NSObject, NSCopying {
         self.formatter = formatter
     }
     
-    
     public func copy(with zone: NSZone? = nil) -> Any {
         let copy = RKSegmentUnit()
-        copy.image = self.image
-        copy.name = self.name
-        copy.markerTypes = self.markerTypes
-        copy.formatter = self.formatter
+        copy.image = image
+        copy.name = name
+        copy.markerTypes = markerTypes
+        copy.formatter = formatter
         return copy
     }
 }
 
 public class RKSegmentUnitControlStyle: NSObject {
-    public var textFieldBackgroundColor: UIColor = UIColor.clear
-    public var textFieldFont: UIFont = kDefaultTextFieldFont
-    public var textFieldTextColor: UIColor = UIColor.white
+    public var textFieldBackgroundColor: UIColor = .clear
+    public var textFieldFont: UIFont = Constants.defaultTextFieldFont
+    public var textFieldTextColor: UIColor = .label
     public var flagOfView: Bool = false
-    
-    public var pointerColor: UIColor = UIColor.white
-    public var textOfUnit : String = ""
-    public var scrollViewBackgroundColor: UIColor = UIColor.clear
-    public var colorOverrides: Dictionary<RKRange<Float>, UIColor>?
+    public var pointerColor: UIColor = .label
+    public var textOfUnit: String = ""
+    public var textOfUnitFont: UIFont = Constants.defaultUnitLabelFont
+    public var textOfUnitColor: UIColor = .secondaryLabel
+    public var scrollViewBackgroundColor: UIColor = .clear
+    public var colorOverrides: [RKRange<Float>: UIColor]?
+    public var textFieldColorOverrides: [RKRange<Float>: UIColor]?
 }
 
-
-public protocol RKMultiUnitRulerDataSource {
-    
-    func unitForSegmentAtIndex(index: Int) -> RKSegmentUnit
-    
+public protocol RKMultiUnitRulerDataSource: AnyObject {
+    func unitForSegment(at index: Int) -> RKSegmentUnit
     func rangeForUnit(_ unit: Dimension) -> RKRange<Float>
-    
-    var numberOfSegments: Int { get set }
-    
+    var numberOfSegments: Int { get }
     func styleForUnit(_ unit: Dimension) -> RKSegmentUnitControlStyle
-    
 }
 
-
-public protocol RKMultiUnitRulerDelegate {
-    func valueChanged(measurement: NSMeasurement)
+public protocol RKMultiUnitRulerDelegate: AnyObject {
+    func valueChanged(measurement: Measurement<Unit>)
 }
 
 
@@ -97,7 +77,7 @@ public class RKMultiUnitRuler: UIView {
         }
     }
     public var delegate: RKMultiUnitRulerDelegate?
-    public var measurement: NSMeasurement?
+    public var measurement: Measurement<Unit>?
     private var segmentControl: UISegmentedControl = UISegmentedControl()
     private var segmentedViews: Array<UIView>?
     public var pointerViews: Array<RKRangePointerView>?
@@ -107,13 +87,13 @@ public class RKMultiUnitRuler: UIView {
     private var textViews: Array<RKRangeTextView>?
     public var direction: RKLayerDirection = .horizontal
     
-    public required override init(frame: CGRect) {
+    public override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
     }
     
-    public required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
         setupViews()
     }
     
@@ -192,28 +172,24 @@ public class RKMultiUnitRuler: UIView {
             segmentControl.translatesAutoresizingMaskIntoConstraints = false
             for index in 0 ... dataSource.numberOfSegments - 1 {
                 segmentControl.insertSegment(
-                    withTitle: dataSource.unitForSegmentAtIndex(
-                        index: index).name,
+                    withTitle: dataSource.unitForSegment(at: index).name,
                     at: index, animated: true
                 )
             }
             
             if (dataSource.numberOfSegments > 0) {
                 self.segmentControl.selectedSegmentIndex = 0
-                if let unit = dataSource.unitForSegmentAtIndex(index: 0).unit {
+                if let unit = dataSource.unitForSegment(at: 0).unit {
                     let style = dataSource.styleForUnit(unit)
-                    segmentControl.tintColor = UIColor.yellow
+                    segmentControl.tintColor = UIColor.tintColor
                     segmentControl.setTitleTextAttributes(
                         [NSAttributedString.Key.foregroundColor: style.textFieldTextColor,
-                         NSAttributedString.Key.font: kDefaultSegmentControlTitleFont], for: .normal)
+                         NSAttributedString.Key.font: Constants.defaultSegmentControlTitleFont], for: .normal)
                     
                 }
             }
             segmentControl.isHidden = true
             addSubview(segmentControl)
-            if tintColor != nil {
-                segmentControl.tintColor = UIColor.clear
-            }
         }
         return self.segmentControl
     }
@@ -231,28 +207,26 @@ public class RKMultiUnitRuler: UIView {
             }
         }
         if let dataSource = self.dataSource, let scrollViews = self.scrollViews {
-            let segmentUnit = dataSource.unitForSegmentAtIndex(index: segmentControl.selectedSegmentIndex)
+            let segmentUnit = dataSource.unitForSegment(at: segmentControl.selectedSegmentIndex)
             if let measurement = self.measurement, let unit = segmentUnit.unit {
-                let value = Float(measurement.converting(to: unit).value)
+                let value = Float(measurement.value)
                 self.textViews?[segmentControl.selectedSegmentIndex].currentValue = value
                 scrollViews[segmentControl.selectedSegmentIndex].currentValue = value
                 scrollViews[segmentControl.selectedSegmentIndex].scrollToCurrentValueOffset()
                 let style = dataSource.styleForUnit(unit)
                 self.segmentControl.setTitleTextAttributes(
                     [NSAttributedString.Key.foregroundColor: style.textFieldTextColor,
-                     NSAttributedString.Key.font: kDefaultSegmentControlTitleFont], for: .normal)
+                     NSAttributedString.Key.font: Constants.defaultSegmentControlTitleFont], for: .normal)
             }
         }
     }
     
     @objc func scrollViewCurrentValueChanged(_ sender: RKRangeScrollView) {
         if let dataSource = self.dataSource {
-            let activeSegmentUnit = dataSource.unitForSegmentAtIndex(
-                index: segmentControl.selectedSegmentIndex)
+            let activeSegmentUnit = dataSource.unitForSegment(at: segmentControl.selectedSegmentIndex)
             if let unit = activeSegmentUnit.unit,
                let scrollViewOfSelectedSegment = self.scrollViews?[segmentControl.selectedSegmentIndex] {
-                self.measurement = NSMeasurement(doubleValue: Double(scrollViewOfSelectedSegment.currentValue),
-                                                 unit: unit)
+                self.measurement = Measurement(value: Double(scrollViewOfSelectedSegment.currentValue), unit: unit)
                 self.delegate?.valueChanged(measurement: self.measurement!)
                 updateTextFields()
             }
@@ -261,11 +235,9 @@ public class RKMultiUnitRuler: UIView {
     
     @objc func textViewValueChanged(_ sender: RKRangeTextView) {
         if let dataSource = self.dataSource {
-            let activeSegmentUnit = dataSource.unitForSegmentAtIndex(
-                index: segmentControl.selectedSegmentIndex)
+            let activeSegmentUnit = dataSource.unitForSegment(at: segmentControl.selectedSegmentIndex)
             if let textViews = self.textViews, let unit = activeSegmentUnit.unit {
-                self.measurement = NSMeasurement(doubleValue: Double(textViews[segmentControl.selectedSegmentIndex].currentValue),
-                                                 unit: unit)
+                self.measurement = Measurement(value: Double(textViews[segmentControl.selectedSegmentIndex].currentValue), unit: unit)
                 self.delegate?.valueChanged(measurement: self.measurement!)
             }
             self.updateScrollViews()
@@ -276,9 +248,9 @@ public class RKMultiUnitRuler: UIView {
         if let dataSource = self.dataSource {
             if let scrollViews = self.scrollViews {
                 for index in 0 ... scrollViews.count - 1 {
-                    let segmentUnit = dataSource.unitForSegmentAtIndex(index: index)
+                    let segmentUnit = dataSource.unitForSegment(at: index)
                     if let measurement = self.measurement, let unit = segmentUnit.unit {
-                        let value = Float(measurement.converting(to: unit).value)
+                        let value = Float(measurement.value)
                         scrollViews[index].currentValue = value
                     }
                     if index == segmentControl.selectedSegmentIndex {
@@ -293,9 +265,9 @@ public class RKMultiUnitRuler: UIView {
         if let dataSource = self.dataSource {
             if let scrollViews = self.scrollViews {
                 for index in 0 ... scrollViews.count - 1 {
-                    let segmentUnit = dataSource.unitForSegmentAtIndex(index: index)
+                    let segmentUnit = dataSource.unitForSegment(at: index)
                     if let measurement = self.measurement, let unit = segmentUnit.unit {
-                        let value = Float(measurement.converting(to: unit).value)
+                        let value = Float(measurement.value)
                         //value = Float(lroundf(value / minScale)) * minScale
                         if index != segmentControl.selectedSegmentIndex {
                             self.textViews?[index].currentValue = value
@@ -303,9 +275,7 @@ public class RKMultiUnitRuler: UIView {
                             DispatchQueue.main.async {
                                 let _ = self.textViews?[index].resignFirstResponder()
                                 self.textViews?[index].currentValue = value
-                                self.textViews?[index].updateTextValue(value: "\(value)")
-                                
-                                
+                                self.textViews?[index].updateTextValue(value: value.formatted(.number))
                             }
                         }
                     }
@@ -325,29 +295,42 @@ public class RKMultiUnitRuler: UIView {
             for index in 0 ... dataSource.numberOfSegments - 1 {
                 let segmentView: UIView = UIView(frame: CGRect.zero)
                 segmentView.translatesAutoresizingMaskIntoConstraints = false
-                let segmentUnit = dataSource.unitForSegmentAtIndex(index: index)
+                let segmentUnit = dataSource.unitForSegment(at: index)
                 if let unit = segmentUnit.unit {
                     let style = dataSource.styleForUnit(unit)
                     let range = dataSource.rangeForUnit(unit)
                     names.append(segmentUnit.name)
-                    let pointerView = self.setupPointerView(inSegmentView: segmentView,
-                                                            unit: segmentUnit,
-                                                            segmentStyle: style)
-                    let scrollView = self.setupSegmentScrollView(inSegmentView: segmentView,
-                                                                 unit: segmentUnit, segmentStyle: style,
-                                                                 range: range)
-                    let textView = self.setupSegmentBottomView(inSegmentView: segmentView,
-                                                               unit: segmentUnit, style: style)
-                    let underlineView = self.setupSegmentLineUnderBottomView(inSegmentView: segmentView)
-                    let lbl = self.setupLabelBottomView(inSegmentView: segmentView, style: style)
+                    let pointerView = self.setupPointerView(
+                        inSegmentView: segmentView,
+                        unit: segmentUnit,
+                        segmentStyle: style
+                    )
+                    let scrollView = self.setupSegmentScrollView(
+                        inSegmentView: segmentView,
+                        unit: segmentUnit,
+                        segmentStyle: style,
+                        range: range
+                    )
+                    let textView = self.setupSegmentBottomView(
+                        inSegmentView: segmentView,
+                        unit: segmentUnit,
+                        style: style
+                    )
+                    let underlineView = self.setupSegmentLineUnderBottomView(
+                        inSegmentView: segmentView
+                    )
+                    let lbl = self.setupLabelBottomView(
+                        inSegmentView: segmentView, style: style
+                    )
                     
                     //                    lbl.frame = CGRect(x: -30, y:0, width:self.bounds.width, height:self.bounds.height)
                     
-                    let segmentSubViews = ["scrollView": scrollView,
-                                           "textView": textView,
-                                           "underlineView": underlineView,
-                                           "pointerView": pointerView,
-                                           "lbl": lbl
+                    let segmentSubViews = [
+                        "scrollView": scrollView,
+                        "textView": textView,
+                        "underlineView": underlineView,
+                        "pointerView": pointerView,
+                        "lbl": lbl
                     ]
                     var constraints = Array<NSLayoutConstraint>()
                     switch (self.direction) {
@@ -378,7 +361,7 @@ public class RKMultiUnitRuler: UIView {
                                                                       options: NSLayoutConstraint.FormatOptions.directionLeadingToTrailing,
                                                                       metrics: nil,
                                                                       views: segmentSubViews)
-                        constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|[lbl]-20-|",
+                        constraints += NSLayoutConstraint.constraints(withVisualFormat: "H:|[lbl]-0-|",
                                                                       options: NSLayoutConstraint.FormatOptions.alignAllCenterX,
                                                                       metrics: nil,
                                                                       views: segmentSubViews)
@@ -456,27 +439,21 @@ public class RKMultiUnitRuler: UIView {
                                         unit segmentUnit: RKSegmentUnit,
                                         style: RKSegmentUnitControlStyle) -> RKRangeTextView {
         let textView = RKRangeTextView(frame: self.bounds)
-        //        textView.frame = CGRect(x: -30, y:0, width:self.bounds.width, height:self.bounds.height)
-        
         textView.backgroundColor = style.textFieldBackgroundColor
         textView.textField.backgroundColor = style.textFieldBackgroundColor
         textView.textField.textColor = style.textFieldTextColor
         textView.textField.textAlignment = .center
         textView.flagOfView = style.flagOfView
-        //        textView.unit = segmentUnit.unit
         textView.formatter = segmentUnit.formatter
         textView.textField.font = UIFont.boldSystemFont(ofSize: 45)
         textView.textField.text = ""
-        //        textView.layer.borderColor = UIColor.black.cgColor
-        //        textView.layer.borderWidth = 2
-        
-        
-        
-        
         textView.translatesAutoresizingMaskIntoConstraints = false
-        textView.addTarget(self,
-                           action: #selector(RKMultiUnitRuler.textViewValueChanged(_:)),
-                           for: .valueChanged)
+        textView.addTarget(
+            self,
+            action: #selector(RKMultiUnitRuler.textViewValueChanged(_:)),
+            for: .valueChanged
+        )
+        textView.colorOverrides = style.textFieldColorOverrides
         parent.addSubview(textView)
         return textView
     }
@@ -491,16 +468,9 @@ public class RKMultiUnitRuler: UIView {
     
     private func setupLabelBottomView(inSegmentView parent: UIView,style: RKSegmentUnitControlStyle) -> UIView {
         let label = UILabel(frame: self.bounds)
-        print("lbl  \(self.bounds)")
-        label.backgroundColor = UIColor.white
-        
-        if isArabic {
-            label.font = UIFont(name: "Tajawal-Regular", size: 14.0)
-        } else {
-            label.font = UIFont(name: "AvertaPE-Regular", size: 14.0)
-        }
         label.text = style.textOfUnit
-        label.textColor = UIColor.gray
+        label.font = style.textOfUnitFont
+        label.textColor = style.textOfUnitColor
         label.textAlignment = .center
         label.translatesAutoresizingMaskIntoConstraints = false
         parent.addSubview(label)
@@ -510,7 +480,6 @@ public class RKMultiUnitRuler: UIView {
     private func setupSegmentLineUnderBottomView(inSegmentView parent: UIView) -> UIView {
         let view = UIView(frame: self.bounds)
         
-        view.backgroundColor = UIColor.white
         view.translatesAutoresizingMaskIntoConstraints = false
         parent.addSubview(view)
         return view

@@ -16,9 +16,9 @@ public enum RKRangePointerShape: Int {
 public class RKRangePointerView: UIView {
     
     var shape: RKRangePointerShape = .triangle
-    var sideOffset = kDefaultPointerLayerSideOffset
-    public var fillColor: UIColor = UIColor.green
-    var lineColor: UIColor = UIColor.white
+    var sideOffset = Constants.defaultPointerLayerSideOffset
+    public var fillColor: UIColor = .tintColor
+    var lineColor: UIColor = .label
     var direction: RKLayerDirection = .horizontal
     var radius: CGFloat = 6.0
     
