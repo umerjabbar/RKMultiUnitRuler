@@ -56,6 +56,7 @@ public class RKSegmentUnitControlStyle: NSObject {
     public var scrollViewBackgroundColor: UIColor = .clear
     public var colorOverrides: [RKRange<Float>: UIColor]?
     public var textFieldColorOverrides: [RKRange<Float>: UIColor]?
+    public var maxFractionDigits: Int = 0
 }
 
 public protocol RKMultiUnitRulerDataSource: AnyObject {
@@ -86,6 +87,12 @@ public class RKMultiUnitRuler: UIView {
     private var scrollViews: Array<RKRangeScrollView>?
     private var textViews: Array<RKRangeTextView>?
     public var direction: RKLayerDirection = .horizontal
+    
+    lazy var generator: UIImpactFeedbackGenerator = {
+        let generator = UIImpactFeedbackGenerator(style: .light)
+        generator.prepare()
+        return generator
+    }()
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -133,7 +140,7 @@ public class RKMultiUnitRuler: UIView {
                         metrics: nil,
                         views: ["segmentView": segmentView])
                     constraints += NSLayoutConstraint.constraints(
-                        withVisualFormat: "V:|-5-[segmentControl]-5-[segmentView]-5-|",
+                        withVisualFormat: "V:|-0-[segmentControl]-5-[segmentView]-5-|",
                         options: NSLayoutConstraint.FormatOptions.directionLeadingToTrailing,
                         metrics: nil,
                         views: ["segmentView": segmentView, "segmentControl": segmentControl])
@@ -228,6 +235,7 @@ public class RKMultiUnitRuler: UIView {
                let scrollViewOfSelectedSegment = self.scrollViews?[segmentControl.selectedSegmentIndex] {
                 self.measurement = Measurement(value: Double(scrollViewOfSelectedSegment.currentValue), unit: unit)
                 self.delegate?.valueChanged(measurement: self.measurement!)
+                generator.impactOccurred()
                 updateTextFields()
             }
         }
@@ -239,6 +247,7 @@ public class RKMultiUnitRuler: UIView {
             if let textViews = self.textViews, let unit = activeSegmentUnit.unit {
                 self.measurement = Measurement(value: Double(textViews[segmentControl.selectedSegmentIndex].currentValue), unit: unit)
                 self.delegate?.valueChanged(measurement: self.measurement!)
+                generator.impactOccurred()
             }
             self.updateScrollViews()
         }
@@ -275,7 +284,7 @@ public class RKMultiUnitRuler: UIView {
                             DispatchQueue.main.async {
                                 let _ = self.textViews?[index].resignFirstResponder()
                                 self.textViews?[index].currentValue = value
-                                self.textViews?[index].updateTextValue(value: value.formatted(.number))
+                                self.textViews?[index].updateTextValue(value: value)
                             }
                         }
                     }
@@ -394,8 +403,6 @@ public class RKMultiUnitRuler: UIView {
                     textViews.append(textView)
                     pointerViews.append(pointerView)
                     self.addSubview(segmentView)
-                    //                    lbl.frame = CGRect(x: -60, y:0, width:self.bounds.width, height:self.bounds.height)
-                    
                 }
             }
         }
@@ -427,9 +434,12 @@ public class RKMultiUnitRuler: UIView {
         scrollView.direction = self.direction
         scrollView.flag = style.flagOfView
         scrollView.translatesAutoresizingMaskIntoConstraints = false
-        scrollView.addTarget(self,
-                             action: #selector(RKMultiUnitRuler.scrollViewCurrentValueChanged(_:)),
-                             for: .valueChanged)
+        scrollView.heightAnchor.constraint(equalToConstant: 120).isActive = true
+        scrollView.addTarget(
+            self,
+            action: #selector(RKMultiUnitRuler.scrollViewCurrentValueChanged(_:)),
+            for: .valueChanged
+        )
         parent.addSubview(scrollView)
         
         return scrollView
@@ -444,7 +454,7 @@ public class RKMultiUnitRuler: UIView {
         textView.textField.textColor = style.textFieldTextColor
         textView.textField.textAlignment = .center
         textView.flagOfView = style.flagOfView
-        textView.formatter = segmentUnit.formatter
+        textView.maxFractionDigits = style.maxFractionDigits
         textView.textField.font = UIFont.boldSystemFont(ofSize: 45)
         textView.textField.text = ""
         textView.translatesAutoresizingMaskIntoConstraints = false
@@ -456,14 +466,6 @@ public class RKMultiUnitRuler: UIView {
         textView.colorOverrides = style.textFieldColorOverrides
         parent.addSubview(textView)
         return textView
-    }
-    
-    public var isArabic: Bool {
-        if #available(iOS 16, *) {
-            return Locale.current.language.languageCode?.identifier ?? "en" == "ar"
-        } else {
-            return Locale.current.languageCode ?? "en" == "ar"
-        }
     }
     
     private func setupLabelBottomView(inSegmentView parent: UIView,style: RKSegmentUnitControlStyle) -> UIView {
