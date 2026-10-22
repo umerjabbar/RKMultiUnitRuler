@@ -192,7 +192,9 @@ class RKRangeLayer: CALayer {
             var distanceBetweenLeastScaleMarkers: Float = 0.0
             switch self.direction {
             case .horizontal:
-                distanceBetweenLeastScaleMarkers = Float(self.frame.width) / range.length
+                // Markers start one side offset in, so they span the width
+                // less both offsets; the last one used to land past the edge.
+                distanceBetweenLeastScaleMarkers = Float(self.frame.width - 2 * Constants.defaultScrollViewSideOffset) / range.length
             case .vertical:
                 distanceBetweenLeastScaleMarkers = Float(self.frame.height) / range.length
             }

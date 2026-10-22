@@ -184,7 +184,8 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
     func offsetCoefficient() -> CGFloat {
         switch self.direction {
         case .horizontal:
-            return self.self.rangeLayer.frame.width / CGFloat(abs(range.length))
+            // The same span the markers are drawn over.
+            return max(self.rangeLayer.frame.width - 2 * self.sideOffset, 0) / CGFloat(abs(range.length))
         case .vertical:
             return self.self.rangeLayer.frame.height / CGFloat(abs(range.length))
         }
@@ -234,7 +235,9 @@ class RKRangeScrollView: UIControl, UIScrollViewDelegate {
 //                return CGRect(x: 0.0, y: 0.0, width: Double(width), height: Double(self.frame.height))
 //                
 //            } else {
-                return CGRect(x: 0.0, y: 0.0, width: Double(width * 2), height: Double(self.frame.height))
+                // A side offset at each end: without them the scroll stopped
+                // 2 * sideOffset short of the range's end.
+                return CGRect(x: 0.0, y: 0.0, width: Double(width * 2) + 2 * Double(self.sideOffset), height: Double(self.frame.height))
 //            }
             
         case .vertical:
